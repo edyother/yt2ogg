@@ -16,35 +16,29 @@ V=$(youtube-dl --get-filename $1)
 # Download video
 youtube-dl "$1"
 
+echo "Ripping audio..."
+
 avconv -i "$V" "$2".flac
-echo "#########################"
-echo "## Video to Audio Done ##"
-echo "#########################"
+
+echo "Converting to mono..."
 
 sox -V2 "$2".flac -c 1 "$2".mono.flac
-echo "#########################"
-echo "## Stereo to Mono Done ##"
-echo "#########################"
+
+echo "Running highpass filter..."
 
 sox -V2 "$2".mono.flac "$2".mono.hp.flac highpass 80
-echo "###################"
-echo "## Highpass Done ##"
-echo "###################"
+
+echo "Running dynamic compression..."
 
 sox -V2 "$2".mono.hp.flac "$2".mono.hp.comp.flac compand 0.3,1.5 6:-60,-45,-15 -7 -90 0.3
-echo "######################"
-echo "## Compression Done ##"
-echo "######################"
+
+echo "Normalizing..."
 
 sox -V2 "$2".mono.hp.comp.flac "$2".mono.hp.comp.norm.flac gain -n -1
-echo "########################"
-echo "## Normalization Done ##"
-echo "########################"
+
+echo "Converting to Ogg Vorbis..."
 
 sox -V2 "$2".mono.hp.comp.norm.flac "$2".ogg
-echo "############################"
-echo "## Conversion to ogg Done ##"
-echo "############################"
 
 cd ..
 
